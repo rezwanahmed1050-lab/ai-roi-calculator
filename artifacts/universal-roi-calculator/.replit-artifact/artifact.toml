@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Universal ROI Calculator"
+description = "A universal lead magnet ROI calculator for any business type. Users enter their business and customer economics to project monthly revenue, annual revenue, and customer lifetime value, then request a personalized ROI analysis by email."
+version = "1.0.0"
+id = "artifacts/universal-roi-calculator"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21016
+
+[services.development]
+run = "pnpm --filter @workspace/universal-roi-calculator run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/universal-roi-calculator", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/universal-roi-calculator/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21016"
+BASE_PATH = "/"
