@@ -24,6 +24,26 @@ import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
 
 const queryClient = new QueryClient();
 
+type EmailJsClient = {
+  init: (publicKey: string) => void;
+  send: (
+    serviceId: string,
+    templateId: string,
+    templateParams: Record<string, string | number>,
+  ) => Promise<{ status: number; text: string }>;
+};
+
+declare global {
+  interface Window {
+    emailjs?: EmailJsClient;
+  }
+}
+
+const EMAILJS_SERVICE_ID = 'service_pz42fg2';
+const EMAILJS_TEMPLATE_ID = 'template_il9uifj';
+const EMAILJS_PUBLIC_KEY = 'M1LcOnWVm7jfxYBF6';
+const ROI_ANALYSIS_RECIPIENT = 'rezwanahmed1050@gmail.com';
+
 type CalculatorValues = {
   businessType: string;
   serviceName: string;
@@ -249,6 +269,8 @@ function CalculatorPage() {
   const [leadErrors, setLeadErrors] = useState<FieldErrors>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const leadRef = useRef<HTMLElement>(null);
+  const [isSending, setIsSending] = useState(false);
+  const [emailError, setEmailError] = useState('');
 
   const results = useMemo(() => {
     const averageValue = Number(calculator.averageValue) || 0;
@@ -290,10 +312,11 @@ function CalculatorPage() {
   const updateLead = (field: keyof LeadValues, value: string) => {
     setLead((current) => ({ ...current, [field]: value }));
     setLeadErrors((current) => ({ ...current, [field]: '' }));
+    setEmailError('');
     setIsSubmitted(false);
   };
 
-  const submitLead = (event: FormEvent<HTMLFormElement>) => {
+  const submitLead = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const nextErrors: FieldErrors = {};
     if (!lead.fullName.trim()) nextErrors.fullName = 'Please enter your full name.';
@@ -302,12 +325,46 @@ function CalculatorPage() {
     setLeadErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
-    console.log('ROI analysis request submitted', {
+    const submission = {
       ...lead,
       calculator,
       projections: results,
-    });
-    setIsSubmitted(true);
+    };
+
+    console.log('ROI analysis request submitted', submission);
+
+    if (!window.emailjs) {
+      setEmailError('The email service is still loading. Please try again in a moment.');
+      return;
+    }
+
+    setIsSending(true);
+    setEmailError('');
+
+    try {
+      window.emailjs.init(EMAILJS_PUBLIC_KEY);
+      await window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        user_name: lead.fullName.trim(),
+        user_email: lead.email.trim(),
+        user_phone: lead.phone.trim(),
+        user_company: lead.companyName.trim(),
+        to_email: ROI_ANALYSIS_RECIPIENT,
+        business_type: calculator.businessType.trim(),
+        service_product_name: calculator.serviceName.trim(),
+        average_customer_value: calculator.averageValue,
+        transactions_per_month: calculator.transactions,
+        customer_lifetime_months: calculator.lifetimeMonths,
+        monthly_revenue_projection: results.monthly,
+        annual_revenue_projection: results.annual,
+        customer_lifetime_value: results.lifetime,
+      });
+      setIsSubmitted(true);
+    } catch (error) {
+      console.error('EmailJS failed to send the ROI analysis request', error);
+      setEmailError('We couldn’t send your analysis right now. Please check your details and try again.');
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const businessLabel = calculator.businessType.trim() || 'your business';
@@ -571,11 +628,14 @@ function CalculatorPage() {
                 <button
                   type="submit"
                   data-testid="button-submit-lead"
-                  className="focus-ring group mt-7 flex h-14 w-full items-center justify-center gap-3 rounded-xl bg-secondary px-5 text-sm font-bold text-primary transition-all duration-300 hover:-translate-y-0.5 hover:bg-secondary/90 hover:shadow-[5px_5px_0_hsl(var(--accent))] active:translate-y-0"
+                  disabled={isSending}
+                  aria-busy={isSending}
+                  className="focus-ring group mt-7 flex h-14 w-full items-center justify-center gap-3 rounded-xl bg-secondary px-5 text-sm font-bold text-primary transition-all duration-300 hover:-translate-y-0.5 hover:bg-secondary/90 hover:shadow-[5px_5px_0_hsl(var(--accent))] active:translate-y-0 disabled:cursor-wait disabled:opacity-70"
                 >
-                  Send Me My ROI Analysis
+                  {isSending ? 'Sending…' : 'Send Me My ROI Analysis'}
                   <ArrowRight aria-hidden="true" className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
                 </button>
+                {emailError ? <p role="alert" className="mt-3 text-center text-xs font-medium text-destructive">{emailError}</p> : null}
                 <p className="mt-4 text-center text-[11px] leading-relaxed text-muted-foreground">By requesting your analysis, you agree to hear from Signal Digital about your results.</p>
               </>
             )}
