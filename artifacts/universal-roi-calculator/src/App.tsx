@@ -41,7 +41,6 @@ declare global {
 
 const EMAILJS_SERVICE_ID = 'service_pz42fg2';
 const EMAILJS_TEMPLATE_ID = 'template_il9uifj';
-const EMAILJS_PUBLIC_KEY = 'M1LcOnWVm7jfxYBF6';
 const ROI_ANALYSIS_RECIPIENT = 'rezwanahmed1050@gmail.com';
 
 type CalculatorValues = {
@@ -333,7 +332,8 @@ function CalculatorPage() {
 
     console.log('ROI analysis request submitted', submission);
 
-    if (!window.emailjs) {
+    if (typeof window.emailjs === 'undefined') {
+      console.error('EmailJS not loaded yet');
       setEmailError('The email service is still loading. Please try again in a moment.');
       return;
     }
@@ -342,7 +342,6 @@ function CalculatorPage() {
     setEmailError('');
 
     try {
-      window.emailjs.init(EMAILJS_PUBLIC_KEY);
       await window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
         user_name: lead.fullName.trim(),
         user_email: lead.email.trim(),
