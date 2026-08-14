@@ -1,5 +1,5 @@
 [build]
- command = "cd artifacts/universal-roi-calculator && pnpm install && BASE_PATH=/ pnpm run build"
+  command = "cd artifacts/universal-roi-calculator && pnpm install && BASE_PATH=/ pnpm run build"
   publish = "artifacts/universal-roi-calculator/out"
 
 [dev]
