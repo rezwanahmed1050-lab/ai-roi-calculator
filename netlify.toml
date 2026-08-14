@@ -1,6 +1,10 @@
 [build]
   command = "cd artifacts/universal-roi-calculator && pnpm install && pnpm run build"
-  publish = "artifacts/universal-roi-calculator/out"
+  publish = "artifacts/universal-roi-calculator/dist/public"
+
+[build.environment]
+  PORT = "3000"
+  BASE_PATH = "/"
 
 [dev]
   command = "cd artifacts/universal-roi-calculator && pnpm run dev"
