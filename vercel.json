@@ -2,8 +2,10 @@
   "buildCommand": "pnpm run build",
   "installCommand": "pnpm install",
   "devCommand": "pnpm run dev",
-  "env": {
-    "PORT": "3000",
-    "BASE_PATH": "/"
-  }
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }
