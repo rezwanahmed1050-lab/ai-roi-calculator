@@ -4,7 +4,7 @@
 
 A universal, AI-powered ROI calculator lead magnet tool built by [Signal Digital](https://signal-digital.com). Helps any business understand their customer lifetime value and revenue potential in seconds.
 
-**[➜ Live Demo](https://agent-6a7f87718af4ec58536--signal-roi-calculator.netlify.app)**
+**[➜ Live Demo](https://signal-roi-calculator.netlify.app)**
 
 ---
 
@@ -129,7 +129,7 @@ Edit `src/App.tsx` to:
 5. Add environment variables in Netlify dashboard
 6. Deploy
 
-**Live Site:** https://agent-6a7f87718af4ec58536--signal-roi-calculator.netlify.app
+**[➜ Live Demo](https://signal-roi-calculator.netlify.app)**
 
 ### Other Platforms
 
